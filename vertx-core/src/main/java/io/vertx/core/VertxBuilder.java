@@ -7,6 +7,7 @@ import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.spi.VertxMetricsFactory;
 import io.vertx.core.spi.VertxTracerFactory;
 import io.vertx.core.spi.cluster.ClusterManager;
+import io.vertx.core.spi.transport.TransportConfig;
 import io.vertx.core.transport.Transport;
 
 /**
@@ -74,6 +75,16 @@ public interface VertxBuilder {
   @GenIgnore(GenIgnore.PERMITTED_TYPE)
   @Fluent
   VertxBuilder withTransport(Transport transport);
+
+  /**
+   * Programmatically set the transport configuration
+   *
+   * @param transportConfig the transport configuration
+   * @return a reference to this, so the API can be used fluently
+   */
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
+  @Fluent
+  VertxBuilder withTransportConfig(TransportConfig transportConfig);
 
   /**
    * Programmatically set the cluster manager to be used when clustering.

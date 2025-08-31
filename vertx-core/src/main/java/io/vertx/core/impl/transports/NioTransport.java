@@ -19,6 +19,7 @@ import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.nio.*;
 import io.vertx.core.spi.transport.Transport;
+import io.vertx.core.spi.transport.TransportConfig;
 
 import java.net.SocketAddress;
 
@@ -53,7 +54,7 @@ public class NioTransport implements Transport {
   }
 
   @Override
-  public IoHandlerFactory ioHandlerFactory() {
+  public IoHandlerFactory ioHandlerFactory(int type, TransportConfig transportConfig) {
     return NioIoHandler.newFactory();
   }
 

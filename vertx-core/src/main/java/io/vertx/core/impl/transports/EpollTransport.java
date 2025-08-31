@@ -23,6 +23,7 @@ import io.vertx.core.net.ClientOptionsBase;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.transport.Transport;
+import io.vertx.core.spi.transport.TransportConfig;
 
 import java.net.SocketAddress;
 
@@ -90,7 +91,10 @@ public class EpollTransport implements Transport {
   }
 
   @Override
-  public IoHandlerFactory ioHandlerFactory() {
+  public IoHandlerFactory ioHandlerFactory(int type, TransportConfig transportConfig) {
+    if (transportConfig instanceof EpollTransportConfig) {
+      return EpollIoHandler.newFactory(((EpollTransportConfig) transportConfig).getMaxEvents(), DefaultSelectStrategyFactory.INSTANCE);
+    }
     return EpollIoHandler.newFactory();
   }
 

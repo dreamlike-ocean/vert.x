@@ -22,6 +22,7 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.core.spi.context.executor.EventExecutorProvider;
 import io.vertx.core.spi.file.FileResolver;
 import io.vertx.core.spi.transport.Transport;
+import io.vertx.core.spi.transport.TransportConfig;
 
 /**
  * Vertx bootstrap for creating vertx instances with SPI overrides.
@@ -147,6 +148,18 @@ public interface VertxBootstrap {
    * @return this builder instance
    */
   VertxBootstrapImpl transport(Transport transport);
+
+  /**
+   * @return the transport config to use
+   */
+  TransportConfig transportConfig();
+
+  /**
+   * Set the transport config to for building Vertx.
+   * @param transportConfig the transport config
+   * @return this builder instance
+   */
+  VertxBootstrap transportConfig(TransportConfig transportConfig);
 
   /**
    * @return the cluster manager to use

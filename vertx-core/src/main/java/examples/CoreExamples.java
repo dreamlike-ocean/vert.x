@@ -17,6 +17,7 @@ import io.vertx.core.dns.AddressResolverOptions;
 import io.vertx.core.file.FileProps;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.http.*;
+import io.vertx.core.impl.transports.EpollTransportConfig;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
@@ -496,8 +497,12 @@ public class CoreExamples {
     // Or use a very specific transport
     transport = Transport.EPOLL;
 
+    // and you can config transport
+    EpollTransportConfig epollTransportConfig = new EpollTransportConfig()
+      .setMaxEvents(1024);
     Vertx vertx = Vertx.builder()
       .withTransport(transport)
+      .withTransportConfig(epollTransportConfig)
       .build();
   }
 

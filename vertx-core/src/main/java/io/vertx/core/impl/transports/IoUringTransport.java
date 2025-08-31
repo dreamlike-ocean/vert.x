@@ -22,6 +22,7 @@ import io.vertx.core.net.ClientOptionsBase;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.impl.SocketAddressImpl;
 import io.vertx.core.spi.transport.Transport;
+import io.vertx.core.spi.transport.TransportConfig;
 
 import java.net.SocketAddress;
 
@@ -58,20 +59,21 @@ public class IoUringTransport implements Transport {
 
   @Override
   public boolean supportsDomainSockets() {
-    return false;
+    return true;
   }
 
   @Override
   public boolean supportFileRegion() {
-    return false;
+    return IoUring.isSpliceSupported();
   }
 
   @Override
   public SocketAddress convert(io.vertx.core.net.SocketAddress address) {
     if (address.isDomainSocket()) {
-      throw new IllegalArgumentException("Domain socket not supported by IOUring transport");
+      return new DomainSocketAddress(address.path());
+    } else {
+      return Transport.super.convert(address);
     }
-    return Transport.super.convert(address);
   }
 
   @Override
@@ -93,7 +95,10 @@ public class IoUringTransport implements Transport {
   }
 
   @Override
-  public IoHandlerFactory ioHandlerFactory() {
+  public IoHandlerFactory ioHandlerFactory(int type, TransportConfig transportConfig) {
+    if (transportConfig instanceof IoUringTransportConfig) {
+      return IoUringIoHandler.newFactory(covert((IoUringTransportConfig) transportConfig, type));
+    }
     return IoUringIoHandler.newFactory();
   }
 
@@ -110,7 +115,7 @@ public class IoUringTransport implements Transport {
   @Override
   public ChannelFactory<? extends Channel> channelFactory(boolean domainSocket) {
     if (domainSocket) {
-      throw new IllegalArgumentException();
+      return IoUringDomainSocketChannel::new;
     }
     return IoUringSocketChannel::new;
   }
@@ -118,7 +123,7 @@ public class IoUringTransport implements Transport {
   @Override
   public ChannelFactory<? extends ServerChannel> serverChannelFactory(boolean domainSocket) {
     if (domainSocket) {
-      throw new IllegalArgumentException();
+      return IoUringServerDomainSocketChannel::new;
     }
     return IoUringServerSocketChannel::new;
   }
@@ -131,28 +136,38 @@ public class IoUringTransport implements Transport {
 
   @Override
   public void configure(NetServerOptions options, boolean domainSocket, ServerBootstrap bootstrap) {
-    if (domainSocket) {
-      throw new IllegalArgumentException();
+    if (!domainSocket) {
+      bootstrap.option(IoUringChannelOption.SO_REUSEPORT, options.isReusePort());
+      if (options.isTcpFastOpen()) {
+        bootstrap.option(IoUringChannelOption.TCP_FASTOPEN, options.isTcpFastOpen() ? pendingFastOpenRequestsThreshold : 0);
+      }
+      bootstrap.childOption(IoUringChannelOption.TCP_QUICKACK, options.isTcpQuickAck());
+      bootstrap.childOption(IoUringChannelOption.TCP_CORK, options.isTcpCork());
     }
-    bootstrap.option(IoUringChannelOption.SO_REUSEPORT, options.isReusePort());
-    if (options.isTcpFastOpen()) {
-      bootstrap.option(IoUringChannelOption.TCP_FASTOPEN, options.isTcpFastOpen() ? pendingFastOpenRequestsThreshold : 0);
-    }
-    bootstrap.childOption(IoUringChannelOption.TCP_QUICKACK, options.isTcpQuickAck());
-    bootstrap.childOption(IoUringChannelOption.TCP_CORK, options.isTcpCork());
     Transport.super.configure(options, false, bootstrap);
   }
 
   @Override
   public void configure(ClientOptionsBase options, int connectTimeout, boolean domainSocket, Bootstrap bootstrap) {
-    if (domainSocket) {
-      throw new IllegalArgumentException();
+    if (!domainSocket) {
+      if (options.isTcpFastOpen()) {
+        bootstrap.option(IoUringChannelOption.TCP_FASTOPEN_CONNECT, options.isTcpFastOpen());
+      }
+      bootstrap.option(IoUringChannelOption.TCP_QUICKACK, options.isTcpQuickAck());
+      bootstrap.option(IoUringChannelOption.TCP_CORK, options.isTcpCork());
     }
-    if (options.isTcpFastOpen()) {
-      bootstrap.option(IoUringChannelOption.TCP_FASTOPEN_CONNECT, options.isTcpFastOpen());
-    }
-    bootstrap.option(IoUringChannelOption.TCP_QUICKACK, options.isTcpQuickAck());
-    bootstrap.option(IoUringChannelOption.TCP_CORK, options.isTcpCork());
     Transport.super.configure(options, connectTimeout, false, bootstrap);
+  }
+
+  private IoUringIoHandlerConfig covert(IoUringTransportConfig transportConfig, int type) {
+    IoUringIoHandlerConfig ioUringIoHandlerConfig = new IoUringIoHandlerConfig();
+    transportConfig.setCqSize(transportConfig.getCqSize());
+    transportConfig.setRingSize(transportConfig.getRingSize());
+    transportConfig.setMaxBoundedWorker(transportConfig.getMaxBoundedWorker());
+    transportConfig.setMaxUnboundedWorker(transportConfig.getMaxUnboundedWorker());
+    if (transportConfig.getBufferRingConfig() != null && type != Transport.ACCEPTOR_EVENT_LOOP_GROUP) {
+      ioUringIoHandlerConfig.setBufferRingConfig(transportConfig.getBufferRingConfig());
+    }
+    return ioUringIoHandlerConfig;
   }
 }

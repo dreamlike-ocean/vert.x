@@ -34,6 +34,7 @@ import io.vertx.core.spi.VerticleFactory;
 import io.vertx.core.spi.VertxMetricsFactory;
 import io.vertx.core.spi.VertxTracerFactory;
 import io.vertx.core.spi.cluster.ClusterManager;
+import io.vertx.core.spi.transport.TransportConfig;
 import io.vertx.core.transport.Transport;
 
 import java.util.Set;
@@ -82,6 +83,7 @@ public interface Vertx extends Measured {
       private VertxMetricsFactory metricsFactory;
       private VertxTracerFactory tracerFactory;
       private Transport transport;
+      private TransportConfig transportConfig;
       @Override
       public io.vertx.core.VertxBuilder with(VertxOptions options) {
         this.options = options;
@@ -107,6 +109,13 @@ public interface Vertx extends Measured {
         this.transport = transport;
         return this;
       }
+
+      @Override
+      public VertxBuilder withTransportConfig(TransportConfig transportConfig) {
+        this.transportConfig = transportConfig;
+        return this;
+      }
+
       private VertxBootstrap bootstrap() {
         VertxBootstrap bootstrap = VertxBootstrap.create();
         if (options != null) {
@@ -122,6 +131,7 @@ public interface Vertx extends Measured {
           tr = Transport.NIO;
         }
         bootstrap.transport(tr.implementation());
+        bootstrap.transportConfig(transportConfig);
         return bootstrap;
       }
       @Override

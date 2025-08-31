@@ -79,7 +79,7 @@ public interface Transport {
     }
   }
 
-  IoHandlerFactory ioHandlerFactory();
+  IoHandlerFactory ioHandlerFactory(int type, TransportConfig transportConfig);
 
   /**
    * @param type one of {@link #ACCEPTOR_EVENT_LOOP_GROUP} or {@link #IO_EVENT_LOOP_GROUP}.
@@ -89,8 +89,8 @@ public interface Transport {
    *
    * @return a new event loop group
    */
-  default EventLoopGroup eventLoopGroup(int type, int nThreads, ThreadFactory threadFactory, int ioRatio) {
-    return new MultiThreadIoEventLoopGroup(nThreads, threadFactory, ioHandlerFactory());
+  default EventLoopGroup eventLoopGroup(int type, int nThreads, ThreadFactory threadFactory, int ioRatio, TransportConfig transportConfig) {
+    return new MultiThreadIoEventLoopGroup(nThreads, threadFactory, ioHandlerFactory(type, transportConfig));
   }
 
   /**

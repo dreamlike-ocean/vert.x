@@ -64,6 +64,7 @@ import io.vertx.core.spi.VertxThreadFactory;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.core.eventbus.impl.clustered.NodeSelector;
 import io.vertx.core.spi.tracing.VertxTracer;
+import io.vertx.core.spi.transport.TransportConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -179,7 +180,9 @@ public class VertxImpl implements VertxInternal, MetricsProvider {
   VertxImpl(VertxOptions options, ClusterManager clusterManager, NodeSelector nodeSelector, VertxMetrics metrics,
             VertxTracer<?, ?> tracer, Transport transport, Throwable transportUnavailabilityCause,
             FileResolver fileResolver, VertxThreadFactory threadFactory, ExecutorServiceFactory executorServiceFactory,
-            EventExecutorProvider eventExecutorProvider, boolean enableShadowContext) {
+            EventExecutorProvider eventExecutorProvider, boolean enableShadowContext,
+            TransportConfig transportConfig
+            ) {
     // Sanity check
     if (Vertx.currentContext() != null) {
       log.warn("You're already on a Vert.x context, are you sure you want to create a new Vertx instance?");
@@ -210,10 +213,10 @@ public class VertxImpl implements VertxInternal, MetricsProvider {
     maxEventLoopExecTime = maxEventLoopExecuteTime;
     maxEventLoopExecTimeUnit = maxEventLoopExecuteTimeUnit;
     eventLoopThreadFactory = createThreadFactory(threadFactory, checker, useDaemonThread, maxEventLoopExecTime, maxEventLoopExecTimeUnit, "vert.x-eventloop-thread-", false);
-    eventLoopGroup = transport.eventLoopGroup(Transport.IO_EVENT_LOOP_GROUP, options.getEventLoopPoolSize(), eventLoopThreadFactory, NETTY_IO_RATIO);
+    eventLoopGroup = transport.eventLoopGroup(Transport.IO_EVENT_LOOP_GROUP, options.getEventLoopPoolSize(), eventLoopThreadFactory, NETTY_IO_RATIO, transportConfig);
     // The acceptor event loop thread needs to be from a different pool otherwise can get lags in accepted connections
     // under a lot of load
-    acceptorEventLoopGroup = transport.eventLoopGroup(Transport.ACCEPTOR_EVENT_LOOP_GROUP, 1, acceptorEventLoopThreadFactory, 100);
+    acceptorEventLoopGroup = transport.eventLoopGroup(Transport.ACCEPTOR_EVENT_LOOP_GROUP, 1, acceptorEventLoopThreadFactory, 100, transportConfig);
     virtualThreadExecutor = virtualThreadFactory != null ? new ThreadPerTaskExecutorService(virtualThreadFactory) : null;
     virtualThreaWorkerPool = virtualThreadFactory != null ? new WorkerPool(virtualThreadExecutor, null) : null;
     internalWorkerPool = new WorkerPool(internalWorkerExec, internalBlockingPoolMetrics);

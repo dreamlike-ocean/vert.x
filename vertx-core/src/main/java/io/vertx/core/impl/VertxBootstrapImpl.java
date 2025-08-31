@@ -31,6 +31,7 @@ import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.core.eventbus.impl.clustered.NodeSelector;
 import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.core.spi.tracing.VertxTracer;
+import io.vertx.core.spi.transport.TransportConfig;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,6 +49,7 @@ public class VertxBootstrapImpl implements VertxBootstrap {
   private boolean enableShadowContext;
   private JsonObject config;
   private Transport transport;
+  private TransportConfig transportConfig;
   private EventExecutorProvider eventExecutorProvider;
   private ClusterManager clusterManager;
   private NodeSelector clusterNodeSelector;
@@ -122,6 +124,17 @@ public class VertxBootstrapImpl implements VertxBootstrap {
    */
   public VertxBootstrapImpl transport(Transport transport) {
     this.transport = transport;
+    return this;
+  }
+
+  @Override
+  public TransportConfig transportConfig() {
+    return transportConfig;
+  }
+
+  @Override
+  public VertxBootstrap transportConfig(TransportConfig transportConfig) {
+    this.transportConfig = transportConfig;
     return this;
   }
 
@@ -240,7 +253,9 @@ public class VertxBootstrapImpl implements VertxBootstrap {
       threadFactory,
       executorServiceFactory,
       eventExecutorProvider,
-      enableShadowContext);
+      enableShadowContext,
+      transportConfig
+      );
   }
 
   public Vertx vertx() {
