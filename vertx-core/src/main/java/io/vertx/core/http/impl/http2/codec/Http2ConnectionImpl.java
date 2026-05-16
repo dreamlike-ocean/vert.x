@@ -20,7 +20,6 @@ import io.netty.handler.codec.http2.Http2Flags;
 import io.netty.handler.codec.http2.Http2FrameListener;
 import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2Settings;
-import io.netty.handler.stream.ChunkedInput;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.FutureListener;
 import io.vertx.core.Future;
@@ -39,6 +38,7 @@ import io.vertx.core.internal.PromiseInternal;
 import io.vertx.core.internal.logging.Logger;
 import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.core.net.impl.ConnectionBase;
+import io.vertx.core.net.impl.VertxChunkedNioFile;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
@@ -472,7 +472,7 @@ abstract class Http2ConnectionImpl extends ConnectionBase implements Http2FrameL
   }
 
   @Override
-  public void sendFile(int streamId, ChunkedInput<ByteBuf> file, Promise<Void> promise) {
+  public void sendFile(int streamId, VertxChunkedNioFile file, Promise<Void> promise) {
     promise.fail("Send file not supported");
   }
 

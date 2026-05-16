@@ -12,7 +12,6 @@ package io.vertx.core.http.impl.http3;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http3.*;
-import io.netty.handler.stream.ChunkedInput;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -33,6 +32,7 @@ import io.vertx.core.http.impl.observability.StreamObserver;
 import io.vertx.core.internal.ContextInternal;
 import io.vertx.core.internal.quic.QuicStreamInternal;
 import io.vertx.core.net.HostAndPort;
+import io.vertx.core.net.impl.VertxChunkedNioFile;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
 
 /**
@@ -133,7 +133,7 @@ public class Http3ServerStream extends Http3Stream<Http3ServerStream, Http3Serve
   }
 
   @Override
-  public void sendFile(ChunkedInput<ByteBuf> file, Promise<Void> promise) {
+  public void sendFile(VertxChunkedNioFile file, Promise<Void> promise) {
 
   }
 

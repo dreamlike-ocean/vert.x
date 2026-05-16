@@ -12,10 +12,10 @@ package io.vertx.core.http.impl.http2;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.Headers;
-import io.netty.handler.stream.ChunkedInput;
 import io.vertx.core.Promise;
 import io.vertx.core.http.StreamPriority;
 import io.vertx.core.internal.ContextInternal;
+import io.vertx.core.net.impl.VertxChunkedNioFile;
 
 public interface Http2Connection {
 
@@ -41,7 +41,7 @@ public interface Http2Connection {
 
   void writePriorityFrame(int streamId, StreamPriority priority, Promise<Void> promise);
 
-  void sendFile(int streamId, ChunkedInput<ByteBuf> file, Promise<Void> promise);
+  void sendFile(int streamId, VertxChunkedNioFile file, Promise<Void> promise);
 
   void consumeCredits(int streamId, int amountOfBytes);
 

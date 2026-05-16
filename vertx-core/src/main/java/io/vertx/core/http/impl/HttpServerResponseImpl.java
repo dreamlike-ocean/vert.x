@@ -11,12 +11,9 @@
 
 package io.vertx.core.http.impl;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpStatusClass;
-import io.netty.handler.stream.ChunkedInput;
-import io.netty.handler.stream.ChunkedNioFile;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -31,6 +28,7 @@ import io.vertx.core.net.HostAndPort;
 import io.vertx.core.net.NetSocket;
 import io.vertx.core.net.impl.ConnectionBase;
 import io.vertx.core.net.impl.UncloseableChunkedNioFile;
+import io.vertx.core.net.impl.VertxChunkedNioFile;
 import io.vertx.core.spi.observability.HttpResponse;
 import io.vertx.core.streams.ReadStream;
 
@@ -608,13 +606,13 @@ public class HttpServerResponseImpl implements HttpServerResponse {
       if (actualLength < 0) {
         return context.failedFuture("offset : " + offset + " is larger than the requested file length : " + size);
       }
-      ChunkedInput<ByteBuf> chunkedFile;
+      VertxChunkedNioFile chunkedFile;
       try {
         if (file != null) {
           channel = file.getChannel();
         }
         if (close) {
-          chunkedFile = new ChunkedNioFile(channel, actualOffset, actualLength, 8192);
+          chunkedFile = new VertxChunkedNioFile(channel, actualOffset, actualLength);
         } else {
           chunkedFile = new UncloseableChunkedNioFile(channel, actualOffset, actualLength);
         }
@@ -637,7 +635,7 @@ public class HttpServerResponseImpl implements HttpServerResponse {
     return fut;
   }
 
-  private Future<Void> sendFileInternal(ChunkedInput<ByteBuf> file) {
+  private Future<Void> sendFileInternal(VertxChunkedNioFile file) {
     if (requiresContentLengthHeader()) {
       if (headersMap.get(HttpHeaderNames.CONTENT_LENGTH) == null) {
         putHeader(HttpHeaderNames.CONTENT_LENGTH, HttpUtils.positiveLongToString(file.length()));

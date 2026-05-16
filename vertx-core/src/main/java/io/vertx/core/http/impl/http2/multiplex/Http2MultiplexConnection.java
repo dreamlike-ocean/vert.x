@@ -19,7 +19,6 @@ import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2PingFrame;
 import io.netty.handler.codec.http2.DefaultHttp2ResetFrame;
 import io.netty.handler.codec.http2.DefaultHttp2UnknownFrame;
-import io.netty.handler.codec.http2.Http2DataChunkedInput;
 import io.netty.handler.codec.http2.Http2Exception;
 import io.netty.handler.codec.http2.Http2Flags;
 import io.netty.handler.codec.http2.Http2Frame;
@@ -28,7 +27,6 @@ import io.netty.handler.codec.http2.Http2FrameStream;
 import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2PingFrame;
 import io.netty.handler.codec.http2.Http2StreamFrame;
-import io.netty.handler.stream.ChunkedInput;
 import io.netty.util.collection.IntObjectHashMap;
 import io.netty.util.collection.IntObjectMap;
 import io.netty.util.concurrent.FutureListener;
@@ -49,6 +47,7 @@ import io.vertx.core.internal.PromiseInternal;
 import io.vertx.core.internal.buffer.BufferInternal;
 import io.vertx.core.net.HostAndPort;
 import io.vertx.core.net.impl.ConnectionBase;
+import io.vertx.core.net.impl.VertxChunkedNioFile;
 import io.vertx.core.spi.metrics.NetworkMetrics;
 import io.vertx.core.spi.metrics.TransportMetrics;
 
@@ -190,10 +189,10 @@ public abstract class Http2MultiplexConnection<S extends Http2Stream> extends Co
     return true;
   }
 
-  public void sendFile(int streamId, ChunkedInput<ByteBuf> file, Promise<Void> promise) {
+  public void sendFile(int streamId, VertxChunkedNioFile file, Promise<Void> promise) {
     StreamChannel channel = channels.get(streamId);
     if (channel != null) {
-      Http2DataChunkedInput chunkedFile = new Http2DataChunkedInput(file, channel.frameStream);
+      VertxHttp2DataChunkedInput chunkedFile = new VertxHttp2DataChunkedInput(file, channel.frameStream);
       ChannelFuture channelFuture = channel.channelContext.writeAndFlush(chunkedFile);
       channelFuture.addListener((PromiseInternal<Void>) promise);
     } else {

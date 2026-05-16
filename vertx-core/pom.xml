@@ -891,6 +891,22 @@
                 <io.netty.iouring.cqSize>1024</io.netty.iouring.cqSize>
               </systemPropertyVariables>
             </configuration>
+            <executions>
+              <execution>
+                <id>io-uring-file-region-disabled</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <argLine>-Xmx1200M --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED</argLine>
+                  <reportsDirectory>${project.build.directory}/surefire-reports-iouring-file-region-disabled</reportsDirectory>
+                  <systemPropertyVariables combine.children="append">
+                    <vertx.iouring.disableFileRegion>true</vertx.iouring.disableFileRegion>
+                  </systemPropertyVariables>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>

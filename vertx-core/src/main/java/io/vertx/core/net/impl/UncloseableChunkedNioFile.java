@@ -10,21 +10,19 @@
  */
 package io.vertx.core.net.impl;
 
-import io.netty.handler.stream.ChunkedNioFile;
-
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 /**
- * A chunked NIO file that does close the underlying resource, letting the file user control the lifecycle of
+ * A chunked NIO file that does not close the underlying resource, letting the file user control the lifecycle of
  * the file descriptor.
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class UncloseableChunkedNioFile extends ChunkedNioFile {
+public class UncloseableChunkedNioFile extends VertxChunkedNioFile {
 
   public UncloseableChunkedNioFile(FileChannel in, long offset, long length) throws IOException {
-    super(in, offset, length, 8192);
+    super(in, offset, length);
   }
 
   @Override

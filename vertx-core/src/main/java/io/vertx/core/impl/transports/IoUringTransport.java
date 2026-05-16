@@ -19,7 +19,12 @@ import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.channel.unix.UnixChannelOption;
 import io.netty.channel.uring.*;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import io.vertx.core.datagram.DatagramSocketOptions;
+import io.vertx.core.impl.SysProps;
+import io.vertx.core.impl.transports.iouring.IoUringChunkedWriteHandler;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.core.net.TcpConfig;
 import io.vertx.core.net.TcpOption;
 import io.vertx.core.net.impl.SocketAddressImpl;
@@ -35,6 +40,7 @@ import static io.vertx.core.impl.transports.NioTransport.configOption;
  */
 public class IoUringTransport implements Transport {
 
+  private static final Logger log = LoggerFactory.getLogger(IoUringTransport.class);
   private static volatile int pendingFastOpenRequestsThreshold = 256;
 
   /**
@@ -59,11 +65,25 @@ public class IoUringTransport implements Transport {
   }
 
   public IoUringTransport() {
+    if (SysProps.IO_URING_DISABLE_FILE_REGION.getBoolean()) {
+      log.info("io_uring FileRegion support is disabled; sendFile will use chunked writes");
+    }
   }
 
   @Override
   public boolean supportsDomainSockets() {
     return true;
+  }
+
+  @Override
+  public boolean supportFileRegion() {
+    return !SysProps.IO_URING_DISABLE_FILE_REGION.getBoolean();
+  }
+
+  @Override
+  public ChunkedWriteHandler chunkedWriteHandler() {
+    return IoUringChunkedWriteHandler.isFileChannelFdAvailable() ?
+      new IoUringChunkedWriteHandler() : Transport.super.chunkedWriteHandler();
   }
 
   @Override

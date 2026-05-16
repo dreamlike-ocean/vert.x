@@ -103,6 +103,11 @@ public enum SysProps {
   INTERN_COMMON_HTTP_REQUEST_HEADERS_TO_LOWER_CASE("vertx.internCommonHttpRequestHeadersToLowerCase"),
 
   /**
+   * Disable io_uring file region writes to force sendfile fallback through chunked writes.
+   */
+  IO_URING_DISABLE_FILE_REGION("vertx.iouring.disableFileRegion"),
+
+  /**
    * Configure the Vert.x logger.
    *
    * Documented and tested.

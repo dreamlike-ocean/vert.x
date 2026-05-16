@@ -16,6 +16,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.InternetProtocolFamily;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import io.vertx.core.datagram.DatagramSocketOptions;
 import io.vertx.core.impl.transports.NioTransport;
 import io.vertx.core.net.TcpConfig;
@@ -49,6 +50,10 @@ public interface Transport {
    */
   default boolean isAvailable() {
     return true;
+  }
+
+  default ChunkedWriteHandler chunkedWriteHandler() {
+    return new ChunkedWriteHandler();
   }
 
   /**
