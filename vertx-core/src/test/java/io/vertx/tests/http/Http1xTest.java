@@ -43,7 +43,7 @@ import io.vertx.core.streams.WriteStream;
 import io.vertx.test.core.*;
 import io.vertx.test.fakedns.DnsRecord;
 import io.vertx.test.fakedns.WithDnsServer;
-import io.vertx.test.http.HttpConfig;
+import io.vertx.test.http.HttpConfigurator;
 import io.vertx.test.tls.Cert;
 import org.junit.*;
 
@@ -58,8 +58,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static io.netty.handler.codec.http.HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE;
-import static io.netty.handler.codec.http.HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE;
 import static io.vertx.core.http.HttpMethod.PUT;
 import static io.vertx.test.core.AssertExpectations.that;
 import static io.vertx.test.core.TestUtils.*;
@@ -73,7 +71,7 @@ import static org.junit.Assert.*;
 public class Http1xTest extends HttpTest {
 
   public Http1xTest() {
-    super(HttpConfig.Http1x.DEFAULT);
+    super(HttpConfigurator.Http1x.DEFAULT);
   }
 
   @Test
@@ -2386,7 +2384,7 @@ public class Http1xTest extends HttpTest {
       req.response().end();
     });
     startServer(testAddress);
-    vertx.createHttpClient()
+    client
       .request(new RequestOptions(requestOptions).setURI("/?t=" + longParam))
       .compose(req -> req
         .send()

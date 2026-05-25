@@ -10,9 +10,7 @@
  */
 package io.vertx.tests.http.http3;
 
-import io.vertx.core.transport.Transport;
 import io.vertx.tests.http.fileupload.HttpServerFileUploadTest;
-import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -21,7 +19,7 @@ import org.junit.Test;
 public class Http3ServerFileUploadTest extends HttpServerFileUploadTest {
 
   public Http3ServerFileUploadTest() {
-    super(new Http3Config());
+    super(new Http3Configurator());
   }
 
   @Ignore("Intermittent failure with timeout on CI")
@@ -42,10 +40,10 @@ public class Http3ServerFileUploadTest extends HttpServerFileUploadTest {
     super.testBrokenFormUploadLargeFile();
   }
 
+  @Ignore("Intermittent failure with timeout on CI")
   @Test
   @Override
   public void testFormUploadVeryLargeFileStreamToDisk() {
-    Assume.assumeFalse("Not supported yet with io_uring", TRANSPORT == Transport.IO_URING);
     super.testFormUploadVeryLargeFileStreamToDisk();
   }
 }

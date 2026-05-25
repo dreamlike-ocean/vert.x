@@ -28,7 +28,7 @@ import io.vertx.test.core.Checkpoint;
 import io.vertx.test.core.IoUringFileRegionDisabled;
 import io.vertx.test.core.Repeat;
 import io.vertx.test.core.TestUtils;
-import io.vertx.test.http.HttpConfig;
+import io.vertx.test.http.HttpConfigurator;
 import io.vertx.test.tls.Cert;
 import org.junit.Assert;
 import org.junit.Test;
@@ -60,7 +60,7 @@ public class Http2Test extends HttpTest {
   }
 
   protected Http2Test(boolean multiplex) {
-    super(new HttpConfig.H2(multiplex));
+    super(new HttpConfigurator.H2(multiplex));
   }
 
   @Test
