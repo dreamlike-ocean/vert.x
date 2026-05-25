@@ -886,6 +886,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
+              <argLine>-Xmx1200M --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED</argLine>
               <systemPropertyVariables combine.children="append">
                 <io.netty.iouring.ringSize>512</io.netty.iouring.ringSize>
                 <io.netty.iouring.cqSize>1024</io.netty.iouring.cqSize>
@@ -900,6 +901,7 @@
                 </goals>
                 <configuration>
                   <argLine>-Xmx1200M --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED</argLine>
+                  <groups>io.vertx.test.core.IoUringFileRegionDisabled</groups>
                   <reportsDirectory>${project.build.directory}/surefire-reports-iouring-file-region-disabled</reportsDirectory>
                   <systemPropertyVariables combine.children="append">
                     <vertx.iouring.disableFileRegion>true</vertx.iouring.disableFileRegion>

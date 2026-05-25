@@ -12,9 +12,24 @@ package io.vertx.tests.http.sendfile;
 
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.test.core.DetectFileDescriptorLeaks;
 import io.vertx.test.tls.Cert;
+import org.junit.Test;
 
 public class Http1xTLSSendFileTest extends Http1xSendFileTest {
+
+  @Override
+  @Test
+  @DetectFileDescriptorLeaks(iterations = 40)
+  public void testSendFile() throws Exception {
+    super.testSendFile();
+  }
+
+  @Override
+  @Test
+  public void testSendFileFailsWhenClientClosesConnection() throws Exception {
+    super.testSendFileFailsWhenClientClosesConnection();
+  }
 
   @Override
   protected HttpServerOptions createBaseServerOptions() {
