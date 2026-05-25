@@ -18,16 +18,28 @@ import io.vertx.core.impl.Utils;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetSocket;
+import io.vertx.test.core.DetectFileDescriptorLeaks;
+import io.vertx.test.core.IoUringFileRegionDisabled;
+import io.vertx.test.core.Repeat;
 import io.vertx.test.core.TestUtils;
 import org.junit.Assume;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
 public class Http1xSendFileTest extends HttpSendFileTest {
+
+  @Override
+  @Test
+  @Category(IoUringFileRegionDisabled.class)
+  @DetectFileDescriptorLeaks(iterations = 40)
+  public void testSendFile() throws Exception {
+    super.testSendFile();
+  }
 
   @Test
   public void testSendFileWithConnectionCloseHeader() throws Exception {
@@ -37,6 +49,7 @@ public class Http1xSendFileTest extends HttpSendFileTest {
   }
 
   @Test
+  @Category(IoUringFileRegionDisabled.class)
   public void testSendFileFailsWhenClientClosesConnection() throws Exception {
     // 10 megs
     final File f = setupFile("file.pdf", TestUtils.randomUnicodeString(10 * 1024 * 1024));

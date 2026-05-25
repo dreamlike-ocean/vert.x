@@ -108,7 +108,8 @@ public class NetClientImpl implements NetClientInternal, CleanableResource<NetCl
     }
     if (ssl || !vertx.transport().supportFileRegion()) {
       // only add ChunkedWriteHandler when SSL is enabled otherwise it is not needed as FileRegion is used.
-      pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());       // For large file / sendfile support
+      ChunkedWriteHandler chunkedWriteHandler = vertx.transport().chunkedWriteHandler();
+      pipeline.addLast("chunkedWriter", chunkedWriteHandler);       // For large file / sendfile support
     }
     if (idleTimeout.toMillis() > 0 || readIdleTimeout.toMillis() > 0 || writeIdleTimeout.toMillis() > 0) {
       pipeline.addLast("idle", new IdleStateHandler(readIdleTimeout.toMillis(), writeIdleTimeout.toMillis(), idleTimeout.toMillis(), TimeUnit.MILLISECONDS));

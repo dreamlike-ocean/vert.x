@@ -21,6 +21,12 @@ public class Http2MultiplexTest extends Http2Test {
   }
 
   @Test
+  @Override
+  public void testSendFileCancellation(Checkpoint checkpoint) throws Exception {
+    super.testSendFileCancellation(checkpoint);
+  }
+
+  @Test
   @Ignore
   @Override
   public void testStreamWeightAndDependency(Checkpoint checkpoint) throws Exception {

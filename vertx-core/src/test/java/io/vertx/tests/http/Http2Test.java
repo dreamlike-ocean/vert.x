@@ -25,12 +25,14 @@ import io.vertx.core.net.SSLEngineOptions;
 import io.vertx.core.net.impl.ConnectionBase;
 import io.vertx.test.core.AsyncTestBase;
 import io.vertx.test.core.Checkpoint;
+import io.vertx.test.core.IoUringFileRegionDisabled;
 import io.vertx.test.core.Repeat;
 import io.vertx.test.core.TestUtils;
 import io.vertx.test.http.HttpConfigurator;
 import io.vertx.test.tls.Cert;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import javax.net.ssl.SSLHandshakeException;
 import java.io.File;
@@ -892,6 +894,7 @@ public class Http2Test extends HttpTest {
   }
 
   @Test
+  @Category(IoUringFileRegionDisabled.class)
   public void testSendFileCancellation(Checkpoint checkpoint) throws Exception {
 
     Path webroot = Files.createTempDirectory("webroot");

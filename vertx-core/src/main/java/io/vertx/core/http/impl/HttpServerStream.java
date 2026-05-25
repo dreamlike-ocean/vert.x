@@ -10,8 +10,6 @@
  */
 package io.vertx.core.http.impl;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.handler.stream.ChunkedInput;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -21,6 +19,7 @@ import io.vertx.core.http.HttpFrame;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.StreamPriority;
 import io.vertx.core.net.HostAndPort;
+import io.vertx.core.net.impl.VertxChunkedNioFile;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -52,7 +51,7 @@ public interface HttpServerStream extends HttpStream {
   HttpServerStream pause();
   HttpServerStream fetch(long amount);
 
-  void sendFile(ChunkedInput<ByteBuf> file, Promise<Void> promise);
+  void sendFile(VertxChunkedNioFile file, Promise<Void> promise);
 
 
   HttpServerStream updatePriority(StreamPriority streamPriority);

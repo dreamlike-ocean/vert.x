@@ -11,8 +11,18 @@
 package io.vertx.tests.http.sendfile;
 
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.test.core.IoUringFileRegionDisabled;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 public class Http2MultiplexSendFileTest extends Http2SendFileTest {
+
+  @Override
+  @Test
+  @Category(IoUringFileRegionDisabled.class)
+  public void testSendFile() throws Exception {
+    super.testSendFile();
+  }
 
   @Override
   protected HttpServerOptions createBaseServerOptions() {

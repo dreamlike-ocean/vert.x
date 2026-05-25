@@ -68,6 +68,7 @@ public final class Http2MultiplexHandler extends ChannelDuplexHandler implements
   private final Http2MultiplexConnectionFactory connectionFactory;
   private final Map<Http2StreamChannel, ChannelHandlerContext> pendingChannels; // For clients
   private final Deque<PromiseInternal<Void>> pendingSettingsAcks;
+  private final ContextInternal context;
   private Http2MultiplexConnection connection;
   private ChannelHandlerContext chctx;
   private Http2Settings localSettings;
@@ -88,6 +89,7 @@ public final class Http2MultiplexHandler extends ChannelDuplexHandler implements
     this.pendingSettingsAcks = pendingAcks;
     this.pendingChannels = new HashMap<>();
     this.connectionFactory = connectionFactory;
+    this.context = context;
   }
 
   Http2MultiplexConnection connection() {
@@ -154,7 +156,8 @@ public final class Http2MultiplexHandler extends ChannelDuplexHandler implements
       this.connection = connectionFactory.createConnection(this, chctx);
     } else if (channel instanceof Http2StreamChannel) {
       if (connection.isServer()) {
-        ctx.pipeline().addBefore(ctx.name(), "chunkedWriter", new ChunkedWriteHandler());
+        ChunkedWriteHandler chunkedWriteHandler = context.owner().transport().chunkedWriteHandler();
+        ctx.pipeline().addBefore(ctx.name(), "chunkedWriter", chunkedWriteHandler);
       } else {
         pendingChannels.put((Http2StreamChannel) channel, ctx);
       }

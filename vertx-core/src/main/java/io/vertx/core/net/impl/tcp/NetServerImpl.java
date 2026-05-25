@@ -291,7 +291,8 @@ public class NetServerImpl implements NetServerInternal {
     }
     if (ssl || !fileRegionEnabled || !vertx.transport().supportFileRegion() || (config.getTrafficShapingOptions() != null && config.getTrafficShapingOptions().getOutboundGlobalBandwidth() > 0)) {
       // only add ChunkedWriteHandler when SSL is enabled or FileRegion isn't supported or when outbound traffic shaping is enabled
-      pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());       // For large file / sendfile support
+      ChunkedWriteHandler chunkedWriteHandler = vertx.transport().chunkedWriteHandler();
+      pipeline.addLast("chunkedWriter", chunkedWriteHandler);       // For large file / sendfile support
     }
   }
 
