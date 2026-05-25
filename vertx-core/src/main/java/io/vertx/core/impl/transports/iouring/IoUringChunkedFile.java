@@ -28,6 +28,7 @@ class IoUringChunkedFile implements ChunkedInput<ByteBuf> {
   private long progress;
   private final IoUringChunkedWriteHandler handler;
   private ByteBuf readBuffer;
+  private boolean readPending;
   private Exception cause;
 
   IoUringChunkedFile(VertxChunkedNioFile input, IoUringChunkedWriteHandler handler) throws Exception {
@@ -39,6 +40,7 @@ class IoUringChunkedFile implements ChunkedInput<ByteBuf> {
   }
 
   void handleReadSuccess(int readBytes) {
+    readPending = false;
     offset += readBytes;
     progress += readBytes;
     readBuffer.writerIndex(readBuffer.writerIndex() + readBytes);
@@ -47,12 +49,14 @@ class IoUringChunkedFile implements ChunkedInput<ByteBuf> {
 
   void handleReadFailure(Exception cause) {
     this.cause = cause;
+    readPending = false;
     ReferenceCountUtil.release(readBuffer);
     readBuffer = null;
     handler.resumeTransfer();
   }
 
   void handleReadCancelled() {
+    readPending = false;
     ReferenceCountUtil.release(readBuffer);
     readBuffer = null;
     closeInput();
@@ -60,17 +64,18 @@ class IoUringChunkedFile implements ChunkedInput<ByteBuf> {
 
   @Override
   public boolean isEndOfInput() {
-    return readBuffer == null && offset >= endOffset;
+    return !readPending && readBuffer == null && offset >= endOffset;
   }
 
   @Override
   public void close() throws Exception {
     if (readBuffer != null) {
-      if (handler.cancel(this)) {
+      if (readPending && handler.cancel(this)) {
         return;
       }
       ReferenceCountUtil.release(readBuffer);
       readBuffer = null;
+      readPending = false;
     }
     input.close();
   }
@@ -82,10 +87,13 @@ class IoUringChunkedFile implements ChunkedInput<ByteBuf> {
 
   @Override
   public ByteBuf readChunk(ByteBufAllocator allocator) throws Exception {
+    // Suspend until the io_uring read completes; traffic shaping may trigger extra flushes.
+    if (readPending) {
+      return null;
+    }
     if (cause != null) {
       throw cause;
     }
-
     ByteBuf readBuffer = this.readBuffer;
     if (readBuffer != null) {
       this.readBuffer = null;
@@ -97,6 +105,7 @@ class IoUringChunkedFile implements ChunkedInput<ByteBuf> {
     int chunkSize = (int) Math.min(DEFAULT_CHUNK_SIZE, endOffset - offset);
     readBuffer = allocator.directBuffer(chunkSize);
     this.readBuffer = readBuffer;
+    readPending = true;
     handler.requestAsyncRead(this, fd, offset, readBuffer);
     return null;
   }
